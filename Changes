@@ -1,0 +1,6 @@
+Revision history for Perl extension Starman::ModCluster.
+
+0.01  Wed May  7 14:09:08 2014
+	- original version; created by h2xs 1.23 with options
+		-AX Starman::ModCluster
+

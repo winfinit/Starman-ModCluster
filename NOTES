@@ -1,0 +1,1 @@
+starman-modcluster --mc-node-name=rjtest --mc-uri=http://127.0.0.1:6666 --mc-context="/rjtest" --mc-alias="localhost" --mc-host=127.0.0.1 --mc-debug=1 cluster.psgi
