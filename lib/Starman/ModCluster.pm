@@ -41,6 +41,11 @@ This server does not support Win32.
 
 For launcher and all of the options please refer to L<starman-modcluster>
 
+=head1 SUPPORT
+
+Please report all bugs via github at
+https://github.com/winfinit/Starman-ModCluster/issues
+
 =head1 AUTHOR
 
 Roman Jurkov E<lt>winfinit@cpan.orgE<gt>

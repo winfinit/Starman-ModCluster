@@ -5,6 +5,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     NAME              => 'Starman::ModCluster',
     VERSION_FROM      => 'lib/Starman/ModCluster.pm', # finds $VERSION
+    EXE_FILES		  => ['bin/starman-modcluster'],
     PREREQ_PM         => {
     	'Net::MCMP' => 0,
  		'Starman'	=> 0,
