@@ -5,14 +5,10 @@ use strict;
 use warnings;
 use base 'Starman::Server';
 use Net::MCMP;
-use Data::Dumper;
 use Text::SimpleTable;
 
 sub pre_loop_hook {
 	my $self = shift;
-
-	#	warn 'pre loop hook';
-	#	warn Dumper $self;
 
 	unless ( exists $self->{options}->{mc_host} ) {
 		if ( defined $self->{options}->{host} ) {
@@ -149,49 +145,32 @@ sub pre_server_close_hook {
 
 1;
 __END__
-# Below is stub documentation for your module. You'd better edit it!
+=encoding utf-8
+
+=for stopwords
 
 =head1 NAME
 
-Starman::ModCluster - Perl extension for blah blah blah
+Starman::Server::ModCluster - extension to Starman::Server that registers pre_server_close_hook and 
+pre_loop_hook of Net::Server to register and remove node from a cluster.
 
-=head1 SYNOPSIS
-
-  use Starman::ModCluster;
-  blah blah blah
 
 =head1 DESCRIPTION
 
-Stub documentation for Starman::ModCluster, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
+This module is not intended to use directly. It should be used via L<starman-modcluster> command
 
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+L<starman-modcluster> L<Starman>
 
 =head1 AUTHOR
 
-Roman Jurkov, E<lt>winfinit@localE<gt>
+Roman Jurkov, E<lt>winfinit@cpan.org<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014 by Roman Jurkov
+Copyright (C) 2014- by Roman Jurkov
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.18.1 or,

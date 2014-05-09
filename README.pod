@@ -1,40 +1,51 @@
-Starman-ModCluster version 0.01
-===============================
+=encoding utf-8
 
-The README is used to introduce the module and provide instructions on
-how to install the module, any machine dependencies it may have (for
-example C compilers and installed libraries) and any other information
-that should be provided before the module is installed.
+=for stopwords
 
-A README file is required for CPAN modules since CPAN extracts the
-README file from a module distribution so that people browsing the
-archive can use it get an idea of the modules uses. It is usually a
-good idea to provide version information here so that people can
-decide whether fixes for the module are worth downloading.
+=head1 NAME
 
-INSTALLATION
+Starman::ModCluster - mod_cluster extension to Starman web server
 
-To install this module type the following:
+=head1 SYNOPSIS
 
-   perl Makefile.PL
-   make
-   make test
-   make install
+  # Run app.psgi with the default settings
+  > starman-modcluster --mc-uri=http://127.0.0.1:6666 --mc-context="/app" --mc-alias="localhost" --mc-host=127.0.0.1
 
-DEPENDENCIES
+Read more options and configurations by running `perldoc starman` (lower-case s).
 
-This module requires these other modules and libraries:
+=head1 DESCRIPTION
 
-  blah blah blah
+Starman::ModCluster is an extension to a Starman web server that allows an application to register with 
+apache web server with mod_cluster, which dynamically adds your node/member to a cluster. That
+permits one to add nodes without a restart of apache.
 
-COPYRIGHT AND LICENCE
+=over 4
 
-Put the correct copyright and licence information here.
+=item UNIX only
 
-Copyright (C) 2014 by Roman Jurkov
+This server does not support Win32.
+
+=back
+
+=head1 OPTIONS	
+
+For launcher and all of the options please refer to L<starman-modcluster>
+
+=head1 AUTHOR
+
+Roman Jurkov E<lt>winfinit@cpan.orgE<gt>
+
+=head1 COPYRIGHT
+
+Roman Jurkov, 2014-
+
+=head1 LICENSE
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.18.1 or,
-at your option, any later version of Perl 5 you may have available.
+it under the same terms as Perl itself.
 
+=head1 SEE ALSO
 
+L<Starman>
+
+=cut

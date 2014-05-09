@@ -8,53 +8,55 @@ our $VERSION = '0.01';
 
 1;
 __END__
-# Below is stub documentation for your module. You'd better edit it!
+
+=encoding utf-8
+
+=for stopwords
 
 =head1 NAME
 
-Starman::ModCluster - Perl extension for blah blah blah
+Starman::ModCluster - mod_cluster extension to Starman web server
 
 =head1 SYNOPSIS
 
-  use Starman::ModCluster;
-  blah blah blah
+  # Run app.psgi with the default settings
+  > starman-modcluster --mc-uri=http://127.0.0.1:6666 --mc-context="/app" --mc-alias="localhost" --mc-host=127.0.0.1
+
+Read more options and configurations by running `perldoc starman` (lower-case s).
 
 =head1 DESCRIPTION
 
-Stub documentation for Starman::ModCluster, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+Starman::ModCluster is an extension to a Starman web server that allows an application to register with 
+apache web server with mod_cluster, which dynamically adds your node/member to a cluster. That
+permits one to add nodes without a restart of apache.
 
-Blah blah blah.
+=over 4
 
-=head2 EXPORT
+=item UNIX only
 
-None by default.
+This server does not support Win32.
 
+=back
 
+=head1 OPTIONS	
 
-=head1 SEE ALSO
-
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+For launcher and all of the options please refer to L<starman-modcluster>
 
 =head1 AUTHOR
 
-Roman Jurkov, E<lt>winfinit@localE<gt>
+Roman Jurkov E<lt>winfinit@cpan.orgE<gt>
 
-=head1 COPYRIGHT AND LICENSE
+=head1 COPYRIGHT
 
-Copyright (C) 2014 by Roman Jurkov
+Roman Jurkov, 2014-
+
+=head1 LICENSE
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.18.1 or,
-at your option, any later version of Perl 5 you may have available.
+it under the same terms as Perl itself.
 
+=head1 SEE ALSO
+
+L<Starman>
 
 =cut
