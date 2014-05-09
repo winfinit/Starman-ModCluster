@@ -22,7 +22,7 @@ Starman::ModCluster - mod_cluster extension to Starman web server
   # Run app.psgi with the default settings
   > starman-modcluster --mc-uri=http://127.0.0.1:6666 --mc-context="/app" --mc-alias="localhost" --mc-host=127.0.0.1
 
-Read more options and configurations by running `perldoc starman` (lower-case s).
+Read more options and configurations by running `perldoc starman-modcluster` (lower-case s).
 
 =head1 DESCRIPTION
 
