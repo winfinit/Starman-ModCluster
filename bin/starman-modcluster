@@ -55,7 +55,7 @@ starman-modcluster - Starman launcher with mod_cluster support
 
 =item --mc-uri (required)
 
-	--mc-uri http://modclusterserver.example.com:6666
+	--mc-uri http://modclusterserver1.example.com:6666,http://modclusterserver2.example.com:6666
 	
 mod_cluster address
 
@@ -100,6 +100,18 @@ Virtual host alias that will be added to httpd. Defaults to StarmanServer
 	--mc-domain MyGroup
 	
 Domain/Load balancer name
+
+=item --mc-status-interval (optional)
+
+	--mc-status-interval 10
+	
+How often in seconds server is going to communicate its status to mod_cluster. Defaults to 30 seconds.
+
+=item --mc-status-disable
+
+	--mc-status-disable (optional)
+	
+Disable status calls to mod_cluster (not recommended)
 
 =item --mc-debug (optional)
 

@@ -10,7 +10,76 @@ use Text::SimpleTable;
 sub pre_loop_hook {
 	my $self = shift;
 
-	unless ( exists $self->{options}->{mc_host} ) {
+
+	# register for a new mcmp
+
+	foreach my $uri ( split ',', $self->{options}->{mc_uri} ) {
+		my $mcmp =
+		  Net::MCMP->new(
+			{ uri => $uri, debug => $self->{options}->{mc_debug} || 0 } );
+
+		#push @mcmp_objects, $mcmp;
+
+		$self->mcmp_config($mcmp);
+		$self->mcmp_enable_app($mcmp);
+		$self->start_mc_status;
+	}
+
+	$self->SUPER::pre_loop_hook(@_);
+}
+
+sub start_mc_status {
+	my $self = shift;
+
+	local $!;
+	my $pid = fork;
+	if ( !defined $pid ) {
+		$self->fatal("Unable to fork mod_cluster status child [$!]");
+	}
+
+	if ( $pid == 0 ) {
+		$SIG{'INT'} = $SIG{'TERM'} = $SIG{'QUIT'} = sub {
+			$self->log( 4, "exiting mod_cluster status reporter" );
+			# just exit, no need to have stop hook
+			exit;
+		};
+		$SIG{'PIPE'} = 'IGNORE';
+		$SIG{'CHLD'} = 'DEFAULT';
+		$SIG{'HUP'}  = 'DEFAULT';
+
+		$self->log( 4, "mod_cluster status reporter forked ($$)" );
+		$0 = "Starman::ModCluster status reporter";
+
+		my @mcmp_obj;
+		foreach my $uri ( split ',', $self->{options}->{mc_uri} ) {
+			my $mcmp =
+			  Net::MCMP->new(
+				{ uri => $uri, debug => $self->{options}->{mc_debug} || 0 } );
+			push @mcmp_obj, $mcmp;
+		}
+
+		while (1) {
+			foreach my $mcmp (@mcmp_obj) {
+				$self->mcmp_status($mcmp);
+
+			}
+			if ( exists $self->{options}->{mc_status_disable} && defined $self->{options}->{mc_status_interval} ) {
+				# communicate just init status, and exit;
+				last;
+			} else {
+				sleep( $self->{options}->{mc_status_interval} || 30 );			
+			}
+		}
+
+		$self->log(4, "exiting mod_cluster status reporter");
+		exit;
+	}
+}
+
+sub mcmp_config {
+	my ( $self, $mcmp ) = @_;
+	
+		unless ( exists $self->{options}->{mc_host} ) {
 		if ( defined $self->{options}->{host} ) {
 			$self->{options}->{mc_host} = $self->{options}->{mc_host};
 		}
@@ -27,7 +96,7 @@ sub pre_loop_hook {
 			$self->{options}->{mc_port} = $ENV{SERVER_PORT};
 		}
 		else {
-			$self->fatal( 'missing mc_port option' );
+			$self->fatal('missing mc_port option');
 		}
 	}
 
@@ -66,56 +135,85 @@ sub pre_loop_hook {
 			$mcdraw->row( $key, $self->{options}->{$key} );
 		}
 
-		warn "Loaded Mod_Cluster configurations:\n" . $mcdraw->draw() . "\n";
+		$self->log( 2,
+			"Loaded Mod_Cluster configurations:\n" . $mcdraw->draw() );
+	}
+	
+	
+	return $mcmp->config(
+		{
+			Balancer     => $self->{options}->{mc_balancer},
+			WaitWorker   => $self->{options}->{mc_wait_worker},
+			MaxAttempts  => $self->{options}->{mc_max_attempts},
+			JvmRoute     => $self->{options}->{mc_node_name},
+			Domain       => $self->{options}->{mc_domain},
+			Host         => $self->{options}->{mc_host},
+			Port         => $self->{options}->{mc_port},
+			Type         => $self->{options}->{mc_type},
+			FlushPackets => $self->{options}->{mc_flush_packets},
+			FlushWait    => $self->{options}->{mc_flush_wait},
+			Ping         => $self->{options}->{mc_ping},
+			Smax         => $self->{options}->{mc_smax},
+			Ttl          => $self->{options}->{mc_ttl},
+			Timeout      => $self->{options}->{mc_timeoutt},
+			Context      => $self->{options}->{mc_context},
+			Alias        => $self->{options}->{mc_alias},
+		}
+	);
+}
+
+sub mcmp_enable_app {
+	my ( $self, $mcmp ) = @_;
+
+	return $mcmp->enable_app(
+		{
+			JvmRoute => $self->{options}->{mc_node_name},
+			Alias    => $self->{options}->{mc_alias},
+			Context  => $self->{options}->{mc_context}
+		}
+	  ),
+	  ;
+}
+
+sub mcmp_status {
+	my ( $self, $mcmp ) = @_;
+
+	$self->log( 4, "sending mcmp status to " . $mcmp->uri );
+
+	my $response = $mcmp->status(
+		{
+			JvmRoute => $self->{options}->{mc_node_name},
+			Load     => 99,
+		}
+	);
+
+	if ( $response->{State} ne 'OK' ) {
+		$self->log( 1, "STATUS response is not OK: " . $response->{Status} );
 	}
 
-	# register for a new mcmp
+	return $response;
 
-	foreach my $uri ( split ',', $self->{options}->{mc_uri} ) {
-		my $mcmp =
-		  Net::MCMP->new(
-			{ uri => $uri, debug => $self->{options}->{mc_debug} || 0 } );
+}
 
-		#push @mcmp_objects, $mcmp;
+sub mcmp_remove_app {
+	my ( $self, $mcmp ) = @_;
 
-		$mcmp->config(
-			{
-				Balancer     => $self->{options}->{mc_balancer},
-				WaitWorker   => $self->{options}->{mc_wait_worker},
-				MaxAttempts  => $self->{options}->{mc_max_attempts},
-				JvmRoute     => $self->{options}->{mc_node_name},
-				Domain       => $self->{options}->{mc_domain},
-				Host         => $self->{options}->{mc_host},
-				Port         => $self->{options}->{mc_port},
-				Type         => $self->{options}->{mc_type},
-				FlushPackets => $self->{options}->{mc_flush_packets},
-				FlushWait    => $self->{options}->{mc_flush_wait},
-				Ping         => $self->{options}->{mc_ping},
-				Smax         => $self->{options}->{mc_smax},
-				Ttl          => $self->{options}->{mc_ttl},
-				Timeout      => $self->{options}->{mc_timeoutt},
-				Context      => $self->{options}->{mc_context},
-				Alias        => $self->{options}->{mc_alias},
-			}
-		);
+	return $mcmp->remove_app(
+		{
+			JvmRoute => $self->{options}->{mc_node_name},
+			Alias    => $self->{options}->{mc_alias},
+			Context  => $self->{options}->{mc_context}
+		}
+	);
+}
 
-		$mcmp->enable_app(
-			{
-				JvmRoute => $self->{options}->{mc_node_name},
-				Alias    => $self->{options}->{mc_alias},
-				Context  => $self->{options}->{mc_context}
-			}
-		  ),
-
-		  $mcmp->status(
-			{
-				JvmRoute => $self->{options}->{mc_node_name},
-				Load     => 99,
-			}
-		  );
-	}
-
-	$self->SUPER::pre_loop_hook(@_);
+sub mcmp_remove_route {
+	my ( $self, $mcmp ) = @_;
+	return $mcmp->remove_route(
+		{
+			JvmRoute => $self->{options}->{mc_node_name},
+		}
+	);
 }
 
 sub pre_server_close_hook {
@@ -126,18 +224,9 @@ sub pre_server_close_hook {
 		  Net::MCMP->new(
 			{ uri => $uri, debug => $self->{options}->{mc_debug} || 0 } );
 
-		$mcmp->remove_app(
-			{
-				JvmRoute => $self->{options}->{mc_node_name},
-				Alias    => $self->{options}->{mc_alias},
-				Context  => $self->{options}->{mc_context}
-			}
-		);
-		$mcmp->remove_route(
-			{
-				JvmRoute => $self->{options}->{mc_node_name},
-			}
-		);
+		$self->mcmp_remove_app($mcmp);
+		$self->mcmp_remove_route($mcmp);
+
 	}
 
 	$self->SUPER::pre_server_close_hook(@_);
