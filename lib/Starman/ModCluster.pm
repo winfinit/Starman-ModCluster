@@ -26,9 +26,8 @@ Read more options and configurations by running `perldoc starman-modcluster` (lo
 
 =head1 DESCRIPTION
 
-Starman::ModCluster is an extension to a Starman web server that allows an application to register with 
-apache web server with mod_cluster, which dynamically adds your node/member to a cluster. That
-permits one to add nodes without a restart of apache.
+Starman::ModCluster is an extension to a Starman web server that allows an application to register with
+mod_cluster (httpd module), and that permits one to have dynamic load balancing.
 
 =over 4
 

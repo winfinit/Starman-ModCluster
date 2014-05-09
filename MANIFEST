@@ -4,6 +4,6 @@ MANIFEST
 README
 t/Starman-ModCluster.t
 lib/Starman/ModCluster.pm
-lib/Starman/server/ModCluster.pm
+lib/Starman/Server/ModCluster.pm
 lib/Plack/Handler/Starman/ModCluster.pm
 bin/starman-modcluster
