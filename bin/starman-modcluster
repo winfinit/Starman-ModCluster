@@ -107,11 +107,19 @@ Domain/Load balancer name
 	
 How often in seconds server is going to communicate its status to mod_cluster. Defaults to 30 seconds.
 
-=item --mc-status-disable
+=item --mc-multicast-enable 
 
-	--mc-status-disable (optional)
+	--mc-multicast-enable 
 	
-Disable status calls to mod_cluster (not recommended)
+Allow Starman to listen for mod_clusters multicast traffic for dynamic subscription
+
+=item --mc-multicast-address (optional)
+
+Address to listen multicast traffic on. Defaults to 224.0.1.105
+
+=item --mc-multicast-port (optional)
+
+Port that mod_cluster is broadcasting its information. Defaults to 23364
 
 =item --mc-debug (optional)
 

@@ -10,6 +10,8 @@ WriteMakefile(
     	'Net::MCMP' => 0,
  		'Starman'	=> 0,
  		'Text::SimpleTable' => 0,
+ 		'IO::Socket::Multicast' => 0,
+ 		'IPC::Shareable' => 0,
  #		'Config::General' => 0,
     }, # e.g., Module::Name => 1.1
     ($] >= 5.008 ?     ## Add these new keywords supported since 5.008

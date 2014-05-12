@@ -6,26 +6,152 @@ use warnings;
 use base 'Starman::Server';
 use Net::MCMP;
 use Text::SimpleTable;
+use IO::Socket::Multicast;
+use IPC::Shareable;
+use Data::Dumper;
 
 sub pre_loop_hook {
 	my $self = shift;
 
-
 	# register for a new mcmp
 
-	foreach my $uri ( split ',', $self->{options}->{mc_uri} ) {
-		my $mcmp =
-		  Net::MCMP->new(
-			{ uri => $uri, debug => $self->{options}->{mc_debug} || 0 } );
+	my @mcmp_uri;
+	tie @mcmp_uri, 'IPC::Shareable', 'mcmp_uris',
+	  {
+		create    => 1,
+		exclusive => 0,
+		mode      => 0644,
+		destroy   => 0,
+	  };
 
-		#push @mcmp_objects, $mcmp;
+	@mcmp_uri = ();
 
-		$self->mcmp_config($mcmp);
-		$self->mcmp_enable_app($mcmp);
+	if ( exists $self->{options}->{mc_uri}
+		&& defined $self->{options}->{mc_uri} )
+	{
+		foreach my $uri ( split ',', $self->{options}->{mc_uri} ) {
+			push @mcmp_uri, $uri;
+			my $mcmp = $self->mcmp($uri);
+
+			$self->mcmp_config($mcmp);
+			$self->mcmp_enable_app($mcmp);
+			$self->mcmp_status($mcmp);
+
+		}
+	}
+
+	if ( $self->{options}->{mc_multicast_enable} ) {
+		$self->start_mc_multicast();
+	}
+
+	if ( @mcmp_uri || $self->{options}->{mc_multicast_enable} ) {
 		$self->start_mc_status;
+	}
+	else {
+		$self->fatal("multicast disabled and no mcmp uris defined");
 	}
 
 	$self->SUPER::pre_loop_hook(@_);
+}
+
+sub pre_server_close_hook {
+	my $self = shift;
+
+	my @mcmp_uri;
+
+	tie @mcmp_uri, 'IPC::Shareable', 'mcmp_uris',
+	  {
+		create    => 0,
+		exclusive => 0,
+		mode      => 0644,
+		destroy   => 1,
+	  };
+
+	foreach my $uri (@mcmp_uri) {
+		my $mcmp = $self->mcmp($uri);
+		$self->mcmp_remove_app($mcmp);
+		$self->mcmp_remove_route($mcmp);
+
+	}
+
+	$self->SUPER::pre_server_close_hook(@_);
+}
+
+sub start_mc_multicast {
+	my $self = shift;
+	local $!;
+	my $pid = fork;
+	if ( !defined $pid ) {
+		$self->fatal("Unable to fork mod_cluster multicast child [$!]");
+	}
+
+	if ( $pid == 0 ) {
+
+		my @mcmp_uri;
+
+		tie @mcmp_uri, 'IPC::Shareable', 'mcmp_uris',
+		  {
+			create    => 0,
+			exclusive => 0,
+			mode      => 0644,
+			destroy   => 0,
+		  };
+
+		$SIG{'INT'} = $SIG{'TERM'} = $SIG{'QUIT'} = sub {
+			$self->log( 4, "exiting mod_cluster multicast handler" );
+			exit;
+		};
+		$SIG{'PIPE'} = 'IGNORE';
+		$SIG{'CHLD'} = 'DEFAULT';
+		$SIG{'HUP'}  = 'DEFAULT';
+
+		$self->log( 4, "mod_cluster multicast handler forked ($$)" );
+		$0 = "Starman::ModCluster multicast handler";
+
+		$self->{options}->{mc_multicast_port}    ||= 23364;
+		$self->{options}->{mc_multicast_address} ||= '224.0.1.105';
+
+		my $s = IO::Socket::Multicast->new(
+			LocalPort => $self->{options}->{mc_multicast_port},
+			LocalAddr => $self->{options}->{mc_multicast_address},
+			Proto     => 'udp',
+			ReuseAddr => 1
+		) || die "Couldnt create mcast object: $!\n";
+		$s->mcast_add( $self->{options}->{mc_multicast_address} )
+		  || die "Couldn't set group: $!\n";
+
+		while (1) {
+			my $data;
+			next unless $s->recv( $data, 1024 );
+
+			my ($addr)  = $data =~ /X-Manager-Address: (.*?)\s/;
+			my ($proto) = $data =~ /X-Manager-Protocol: (.*?)\s/;
+
+			if ( defined $addr && defined $proto ) {
+				my $mcast_uri = "$proto://$addr";
+
+				# dont want to add same ips over and over
+				my $duplicate = 0;
+				foreach my $uri (@mcmp_uri) {
+					if ( $uri eq $mcast_uri ) {
+						$duplicate = 1;
+						last;
+					}
+				}
+				unless ($duplicate) {
+					my $mcmp = $self->mcmp($mcast_uri);
+					$self->mcmp_config($mcmp);
+					$self->mcmp_enable_app($mcmp);
+					$self->mcmp_status($mcmp);
+					push @mcmp_uri, $mcast_uri;
+				}
+			}
+
+		}
+
+		$self->log( 4, "exiting mod_cluster multicast handler" );
+		exit;
+	}
 }
 
 sub start_mc_status {
@@ -40,6 +166,7 @@ sub start_mc_status {
 	if ( $pid == 0 ) {
 		$SIG{'INT'} = $SIG{'TERM'} = $SIG{'QUIT'} = sub {
 			$self->log( 4, "exiting mod_cluster status reporter" );
+
 			# just exit, no need to have stop hook
 			exit;
 		};
@@ -50,36 +177,45 @@ sub start_mc_status {
 		$self->log( 4, "mod_cluster status reporter forked ($$)" );
 		$0 = "Starman::ModCluster status reporter";
 
-		my @mcmp_obj;
-		foreach my $uri ( split ',', $self->{options}->{mc_uri} ) {
-			my $mcmp =
-			  Net::MCMP->new(
-				{ uri => $uri, debug => $self->{options}->{mc_debug} || 0 } );
-			push @mcmp_obj, $mcmp;
-		}
+		my @mcmp_uri;
+
+		tie @mcmp_uri, 'IPC::Shareable', 'mcmp_uris',
+		  {
+			create    => 0,
+			exclusive => 0,
+			mode      => 0644,
+			destroy   => 0,
+		  };
 
 		while (1) {
-			foreach my $mcmp (@mcmp_obj) {
+			foreach my $uri (@mcmp_uri) {
+				my $mcmp = $self->mcmp($uri);
 				$self->mcmp_status($mcmp);
-
 			}
-			if ( exists $self->{options}->{mc_status_disable} && defined $self->{options}->{mc_status_interval} ) {
-				# communicate just init status, and exit;
-				last;
-			} else {
-				sleep( $self->{options}->{mc_status_interval} || 30 );			
-			}
+			sleep( $self->{options}->{mc_status_interval} || 30 );
 		}
 
-		$self->log(4, "exiting mod_cluster status reporter");
+		$self->log( 4, "exiting mod_cluster status reporter" );
 		exit;
 	}
 }
 
+sub mcmp {
+	my ( $self, $uri ) = @_;
+
+	unless ($uri) {
+		$self->fatal("uri is required at mcmp helper");
+	}
+
+	my $mcmp = Net::MCMP->new(
+		{ uri => $uri, debug => $self->{options}->{mc_debug} || 0 } );
+	return $mcmp;
+
+}
 sub mcmp_config {
 	my ( $self, $mcmp ) = @_;
-	
-		unless ( exists $self->{options}->{mc_host} ) {
+
+	unless ( exists $self->{options}->{mc_host} ) {
 		if ( defined $self->{options}->{host} ) {
 			$self->{options}->{mc_host} = $self->{options}->{mc_host};
 		}
@@ -138,8 +274,7 @@ sub mcmp_config {
 		$self->log( 2,
 			"Loaded Mod_Cluster configurations:\n" . $mcdraw->draw() );
 	}
-	
-	
+
 	return $mcmp->config(
 		{
 			Balancer     => $self->{options}->{mc_balancer},
@@ -214,22 +349,6 @@ sub mcmp_remove_route {
 			JvmRoute => $self->{options}->{mc_node_name},
 		}
 	);
-}
-
-sub pre_server_close_hook {
-	my $self = shift;
-
-	foreach my $uri ( split ',', $self->{options}->{mc_uri} ) {
-		my $mcmp =
-		  Net::MCMP->new(
-			{ uri => $uri, debug => $self->{options}->{mc_debug} || 0 } );
-
-		$self->mcmp_remove_app($mcmp);
-		$self->mcmp_remove_route($mcmp);
-
-	}
-
-	$self->SUPER::pre_server_close_hook(@_);
 }
 
 1;

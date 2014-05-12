@@ -4,3 +4,5 @@ Revision history for Perl extension Starman::ModCluster.
 	- initial release
 0.02  Fri May  9 12:00:00 2014
 	- adding support status support
+0.03  Fri May  9 18:00:00 2014
+	- added multicast support
