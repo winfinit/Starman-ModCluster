@@ -5,7 +5,6 @@ use strict;
 use warnings;
 use base 'Starman::Server';
 use Net::MCMP;
-use Text::SimpleTable;
 use IO::Socket::Multicast;
 use IPC::Shareable;
 use Data::Dumper;
@@ -260,19 +259,6 @@ sub mcmp_config {
 		{
 			$self->{options}->{$key} = join ',', @{ $self->{options}->{$key} };
 		}
-	}
-
-	if ( $self->{options}->{mc_debug} ) {
-		my $mcdraw =
-		  Text::SimpleTable->new( [ 20, 'Configuration' ], [ 51, 'Value' ] );
-
-		foreach my $key ( keys %{ $self->{options} } ) {
-			next unless $key =~ /^mc_/;
-			$mcdraw->row( $key, $self->{options}->{$key} );
-		}
-
-		$self->log( 2,
-			"Loaded Mod_Cluster configurations:\n" . $mcdraw->draw() );
 	}
 
 	return $mcmp->config(

@@ -17,7 +17,7 @@
 #     CONFIGURE_REQUIRES => {  }
 #     EXE_FILES => [q[bin/starman-modcluster]]
 #     NAME => q[Starman::ModCluster]
-#     PREREQ_PM => { Net::MCMP=>q[0], Starman=>q[0], Text::SimpleTable=>q[0] }
+#     PREREQ_PM => { IO::Socket::Multicast=>q[0], IPC::Shareable=>q[0], Text::SimpleTable=>q[0], Starman=>q[0], Net::MCMP=>q[0] }
 #     TEST_REQUIRES => {  }
 #     VERSION_FROM => q[lib/Starman/ModCluster.pm]
 
@@ -58,11 +58,11 @@ DIRFILESEP = /
 DFSEP = $(DIRFILESEP)
 NAME = Starman::ModCluster
 NAME_SYM = Starman_ModCluster
-VERSION = 0.02
+VERSION = 0.03
 VERSION_MACRO = VERSION
-VERSION_SYM = 0_02
+VERSION_SYM = 0_03
 DEFINE_VERSION = -D$(VERSION_MACRO)=\"$(VERSION)\"
-XS_VERSION = 0.02
+XS_VERSION = 0.03
 XS_VERSION_MACRO = XS_VERSION
 XS_DEFINE_VERSION = -D$(XS_VERSION_MACRO)=\"$(XS_VERSION)\"
 INST_ARCHLIB = blib/arch
@@ -192,14 +192,14 @@ TO_INST_PM = README.pod \
 	lib/Starman/ModCluster.pm \
 	lib/Starman/Server/ModCluster.pm
 
-PM_TO_BLIB = lib/Plack/Handler/Starman/ModCluster.pm \
-	blib/lib/Plack/Handler/Starman/ModCluster.pm \
-	README.pod \
+PM_TO_BLIB = README.pod \
 	$(INST_LIB)/Starman/README.pod \
+	lib/Starman/ModCluster.pm \
+	blib/lib/Starman/ModCluster.pm \
 	lib/Starman/Server/ModCluster.pm \
 	blib/lib/Starman/Server/ModCluster.pm \
-	lib/Starman/ModCluster.pm \
-	blib/lib/Starman/ModCluster.pm
+	lib/Plack/Handler/Starman/ModCluster.pm \
+	blib/lib/Plack/Handler/Starman/ModCluster.pm
 
 
 # --- MakeMaker platform_constants section:
@@ -268,7 +268,7 @@ RCS_LABEL = rcs -Nv$(VERSION_SYM): -q
 DIST_CP = best
 DIST_DEFAULT = tardist
 DISTNAME = Starman-ModCluster
-DISTVNAME = Starman-ModCluster-0.02
+DISTVNAME = Starman-ModCluster-0.03
 
 
 # --- MakeMaker macro section:
@@ -422,17 +422,17 @@ POD2MAN = $(POD2MAN_EXE)
 
 manifypods : pure_all  \
 	bin/starman-modcluster \
-	lib/Starman/ModCluster.pm \
-	README.pod \
 	lib/Plack/Handler/Starman/ModCluster.pm \
-	lib/Starman/Server/ModCluster.pm
+	lib/Starman/Server/ModCluster.pm \
+	README.pod \
+	lib/Starman/ModCluster.pm
 	$(NOECHO) $(POD2MAN) --section=1 --perm_rw=$(PERM_RW) \
 	  bin/starman-modcluster $(INST_MAN1DIR)/starman-modcluster.$(MAN1EXT) 
 	$(NOECHO) $(POD2MAN) --section=3 --perm_rw=$(PERM_RW) \
-	  lib/Starman/ModCluster.pm $(INST_MAN3DIR)/Starman::ModCluster.$(MAN3EXT) \
-	  README.pod $(INST_MAN3DIR)/Starman::README.$(MAN3EXT) \
 	  lib/Plack/Handler/Starman/ModCluster.pm $(INST_MAN3DIR)/Plack::Handler::Starman::ModCluster.$(MAN3EXT) \
-	  lib/Starman/Server/ModCluster.pm $(INST_MAN3DIR)/Starman::Server::ModCluster.$(MAN3EXT) 
+	  lib/Starman/Server/ModCluster.pm $(INST_MAN3DIR)/Starman::Server::ModCluster.$(MAN3EXT) \
+	  README.pod $(INST_MAN3DIR)/Starman::README.$(MAN3EXT) \
+	  lib/Starman/ModCluster.pm $(INST_MAN3DIR)/Starman::ModCluster.$(MAN3EXT) 
 
 
 
@@ -475,22 +475,22 @@ clean_subdirs :
 
 clean :: clean_subdirs
 	- $(RM_F) \
-	  perl.exe core.*perl.*.? \
-	  lib$(BASEEXT).def *perl.core \
-	  $(INST_ARCHAUTODIR)/extralibs.all pm_to_blib.ts \
-	  *$(OBJ_EXT) MYMETA.json \
-	  core.[0-9][0-9][0-9] $(INST_ARCHAUTODIR)/extralibs.ld \
-	  $(MAKE_APERL_FILE) MYMETA.yml \
-	  $(BOOTSTRAP) *$(LIB_EXT) \
-	  core.[0-9][0-9][0-9][0-9] perl$(EXE_EXT) \
-	  pm_to_blib core.[0-9][0-9][0-9][0-9][0-9] \
-	  blibdirs.ts core.[0-9] \
-	  mon.out so_locations \
-	  $(BASEEXT).def $(BASEEXT).bso \
-	  core.[0-9][0-9] tmon.out \
-	  perl perlmain.c \
-	  $(BASEEXT).exp $(BASEEXT).x \
-	  core 
+	  core.*perl.*.? so_locations \
+	  $(INST_ARCHAUTODIR)/extralibs.all $(BASEEXT).def \
+	  core.[0-9][0-9][0-9] $(BOOTSTRAP) \
+	  MYMETA.json MYMETA.yml \
+	  pm_to_blib *$(LIB_EXT) \
+	  core.[0-9][0-9] lib$(BASEEXT).def \
+	  $(BASEEXT).exp core.[0-9][0-9][0-9][0-9][0-9] \
+	  $(INST_ARCHAUTODIR)/extralibs.ld core.[0-9] \
+	  *$(OBJ_EXT) pm_to_blib.ts \
+	  perl core \
+	  $(MAKE_APERL_FILE) perl.exe \
+	  mon.out *perl.core \
+	  $(BASEEXT).x core.[0-9][0-9][0-9][0-9] \
+	  tmon.out blibdirs.ts \
+	  perl$(EXE_EXT) $(BASEEXT).bso \
+	  perlmain.c 
 	- $(RM_RF) \
 	  blib 
 	- $(MV) $(FIRST_MAKEFILE) $(MAKEFILE_OLD) $(DEV_NULL)
@@ -505,7 +505,7 @@ realclean_subdirs :
 # Delete temporary files (via clean) and also delete dist files
 realclean purge ::  clean realclean_subdirs
 	- $(RM_F) \
-	  $(FIRST_MAKEFILE) $(MAKEFILE_OLD) 
+	  $(MAKEFILE_OLD) $(FIRST_MAKEFILE) 
 	- $(RM_RF) \
 	  $(DISTVNAME) 
 
@@ -533,10 +533,12 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) '    - t' >> META_new.yml
 	$(NOECHO) $(ECHO) '    - inc' >> META_new.yml
 	$(NOECHO) $(ECHO) 'requires:' >> META_new.yml
+	$(NOECHO) $(ECHO) '  IO::Socket::Multicast: 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '  IPC::Shareable: 0' >> META_new.yml
 	$(NOECHO) $(ECHO) '  Net::MCMP: 0' >> META_new.yml
 	$(NOECHO) $(ECHO) '  Starman: 0' >> META_new.yml
 	$(NOECHO) $(ECHO) '  Text::SimpleTable: 0' >> META_new.yml
-	$(NOECHO) $(ECHO) 'version: 0.02' >> META_new.yml
+	$(NOECHO) $(ECHO) 'version: 0.03' >> META_new.yml
 	-$(NOECHO) $(MV) META_new.yml $(DISTVNAME)/META.yml
 	$(NOECHO) $(ECHO) Generating META.json
 	$(NOECHO) $(ECHO) '{' > META_new.json
@@ -573,6 +575,8 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) '      },' >> META_new.json
 	$(NOECHO) $(ECHO) '      "runtime" : {' >> META_new.json
 	$(NOECHO) $(ECHO) '         "requires" : {' >> META_new.json
+	$(NOECHO) $(ECHO) '            "IO::Socket::Multicast" : "0",' >> META_new.json
+	$(NOECHO) $(ECHO) '            "IPC::Shareable" : "0",' >> META_new.json
 	$(NOECHO) $(ECHO) '            "Net::MCMP" : "0",' >> META_new.json
 	$(NOECHO) $(ECHO) '            "Starman" : "0",' >> META_new.json
 	$(NOECHO) $(ECHO) '            "Text::SimpleTable" : "0"' >> META_new.json
@@ -580,7 +584,7 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) '      }' >> META_new.json
 	$(NOECHO) $(ECHO) '   },' >> META_new.json
 	$(NOECHO) $(ECHO) '   "release_status" : "stable",' >> META_new.json
-	$(NOECHO) $(ECHO) '   "version" : "0.02"' >> META_new.json
+	$(NOECHO) $(ECHO) '   "version" : "0.03"' >> META_new.json
 	$(NOECHO) $(ECHO) '}' >> META_new.json
 	-$(NOECHO) $(MV) META_new.json $(DISTVNAME)/META.json
 
@@ -880,6 +884,8 @@ ppd :
 	$(NOECHO) $(ECHO) '    <ABSTRACT>mod_cluster extension to Starman web server</ABSTRACT>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <AUTHOR>Roman Jurkov &lt;winfinit@cpan.org&gt;</AUTHOR>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <IMPLEMENTATION>' >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '        <REQUIRE NAME="IO::Socket::Multicast" />' >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '        <REQUIRE NAME="IPC::Shareable" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Net::MCMP" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Starman::" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Text::SimpleTable" />' >> $(DISTNAME).ppd
@@ -893,10 +899,10 @@ ppd :
 
 pm_to_blib : $(FIRST_MAKEFILE) $(TO_INST_PM)
 	$(NOECHO) $(ABSPERLRUN) -MExtUtils::Install -e 'pm_to_blib({@ARGV}, '\''$(INST_LIB)/auto'\'', q[$(PM_FILTER)], '\''$(PERM_DIR)'\'')' -- \
-	  lib/Plack/Handler/Starman/ModCluster.pm blib/lib/Plack/Handler/Starman/ModCluster.pm \
 	  README.pod $(INST_LIB)/Starman/README.pod \
+	  lib/Starman/ModCluster.pm blib/lib/Starman/ModCluster.pm \
 	  lib/Starman/Server/ModCluster.pm blib/lib/Starman/Server/ModCluster.pm \
-	  lib/Starman/ModCluster.pm blib/lib/Starman/ModCluster.pm 
+	  lib/Plack/Handler/Starman/ModCluster.pm blib/lib/Plack/Handler/Starman/ModCluster.pm 
 	$(NOECHO) $(TOUCH) pm_to_blib
 
 

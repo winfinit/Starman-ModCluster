@@ -1,4 +1,4 @@
-Starman-ModCluster version 0.01
+Starman-ModCluster version 0.04
 ===============================
 
 The README is used to introduce the module and provide instructions on
@@ -25,11 +25,14 @@ DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-  blah blah blah
+  	Net::MCMP
+ 	Starman
+ 	IO::Socket::Multicast
+ 	IPC::Shareable
 
 COPYRIGHT AND LICENCE
 
-Put the correct copyright and licence information here.
+Put the correct copyright and license information here.
 
 Copyright (C) 2014 by Roman Jurkov
 

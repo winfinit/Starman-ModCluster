@@ -9,7 +9,6 @@ WriteMakefile(
     PREREQ_PM         => {
     	'Net::MCMP' => 0,
  		'Starman'	=> 0,
- 		'Text::SimpleTable' => 0,
  		'IO::Socket::Multicast' => 0,
  		'IPC::Shareable' => 0,
  #		'Config::General' => 0,
