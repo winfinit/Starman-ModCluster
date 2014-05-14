@@ -6,5 +6,7 @@ Revision history for Perl extension Starman::ModCluster.
 	- adding support status support
 0.03  Fri May  9 18:00:00 2014
 	- added multicast support
-0.05 Tue May 14 12:40:00 2014
+0.05 Tue May 14 00:40:00 2014
 	- fixed bug where node would not re-register with mod_cluster
+0.06 Tue May 14 12:19:00 2014
+	- removed debug messages that were left by mistake

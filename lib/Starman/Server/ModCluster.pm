@@ -7,7 +7,6 @@ use base 'Starman::Server';
 use Net::MCMP;
 use IO::Socket::Multicast;
 use IPC::Shareable;
-use Data::Dumper;
 
 sub pre_loop_hook {
 	my $self = shift;
@@ -190,11 +189,6 @@ sub start_mc_status {
 			foreach my $uri (@mcmp_uri) {
 				my $mcmp     = $self->mcmp($uri);
 				my $response = $self->mcmp_status($mcmp);
-				unless ($response) {
-					use Data::Dumper;
-					warn Dumper $response;
-
-				}
 			}
 			sleep( $self->{options}->{mc_status_interval} || 30 );
 		}
