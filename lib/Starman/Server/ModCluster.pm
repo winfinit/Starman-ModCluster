@@ -188,8 +188,13 @@ sub start_mc_status {
 
 		while (1) {
 			foreach my $uri (@mcmp_uri) {
-				my $mcmp = $self->mcmp($uri);
-				$self->mcmp_status($mcmp);
+				my $mcmp     = $self->mcmp($uri);
+				my $response = $self->mcmp_status($mcmp);
+				unless ($response) {
+					use Data::Dumper;
+					warn Dumper $response;
+
+				}
 			}
 			sleep( $self->{options}->{mc_status_interval} || 30 );
 		}
@@ -211,6 +216,7 @@ sub mcmp {
 	return $mcmp;
 
 }
+
 sub mcmp_config {
 	my ( $self, $mcmp ) = @_;
 
@@ -308,8 +314,13 @@ sub mcmp_status {
 		}
 	);
 
-	if ( $response->{State} ne 'OK' ) {
+	if ( exists $response->{State} && $response->{State} ne 'OK' ) {
 		$self->log( 1, "STATUS response is not OK: " . $response->{Status} );
+	}
+	else {
+  		# try to register again, mod_cluster was probably restarted and lost this node
+		$self->mcmp_config($mcmp);
+		$self->mcmp_enable_app($mcmp);
 	}
 
 	return $response;

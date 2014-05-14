@@ -3,7 +3,7 @@ package Starman::ModCluster;
 use strict;
 use warnings;
 use 5.008_001;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 
 1;
