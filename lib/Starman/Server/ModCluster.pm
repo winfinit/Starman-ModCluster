@@ -263,22 +263,34 @@ sub mcmp_config {
 
 	return $mcmp->config(
 		{
-			Balancer     => $self->{options}->{mc_balancer},
-			WaitWorker   => $self->{options}->{mc_wait_worker},
-			MaxAttempts  => $self->{options}->{mc_max_attempts},
-			JvmRoute     => $self->{options}->{mc_node_name},
-			Domain       => $self->{options}->{mc_domain},
-			Host         => $self->{options}->{mc_host},
-			Port         => $self->{options}->{mc_port},
-			Type         => $self->{options}->{mc_type},
-			FlushPackets => $self->{options}->{mc_flush_packets},
-			FlushWait    => $self->{options}->{mc_flush_wait},
-			Ping         => $self->{options}->{mc_ping},
-			Smax         => $self->{options}->{mc_smax},
-			Ttl          => $self->{options}->{mc_ttl},
-			Timeout      => $self->{options}->{mc_timeoutt},
-			Context      => $self->{options}->{mc_context},
-			Alias        => $self->{options}->{mc_alias},
+			Balancer            => $self->{options}->{mc_balancer},
+			WaitWorker          => $self->{options}->{mc_wait_worker},
+			MaxAttempts         => $self->{options}->{mc_max_attempts},
+			JvmRoute            => $self->{options}->{mc_node_name},
+			Domain              => $self->{options}->{mc_domain},
+			Host                => $self->{options}->{mc_host},
+			Port                => $self->{options}->{mc_port},
+			Type                => $self->{options}->{mc_type},
+			FlushPackets        => $self->{options}->{mc_flush_packets},
+			FlushWait           => $self->{options}->{mc_flush_wait},
+			Ping                => $self->{options}->{mc_ping},
+			Smax                => $self->{options}->{mc_smax},
+			Ttl                 => $self->{options}->{mc_ttl},
+			Timeout             => $self->{options}->{mc_timeoutt},
+			Context             => $self->{options}->{mc_context},
+			Alias               => $self->{options}->{mc_alias},
+			StickySession       => $self->{options}->{mc_sticky_session},
+			StickySessionCookie => $self->{options}->{mc_sticky_session_cookie},
+			StickySessionPath   => $self->{options}->{mc_sticky_session_path},
+			StickySessionRemove => $self->{options}->{mc_sticky_session_remove},
+			WaitWorker          => $self->{options}->{mc_wait_worker},
+			MaxAttempts         => $self->{options}->{mc_max_attempts},
+			FlushPackets        => $self->{options}->{mc_flush_packets},
+			FlushWait           => $self->{options}->{mc_flushwait},
+			Ping                => $self->{options}->{mc_ping},
+			Smax                => $self->{options}->{mc_smax},
+			Ttl                 => $self->{options}->{mc_ttl},
+			Timeout             => $self->{options}->{mc_timeout},
 		}
 	);
 }
@@ -312,7 +324,7 @@ sub mcmp_status {
 		$self->log( 1, "STATUS response is not OK: " . $response->{Status} );
 	}
 	else {
-  		# try to register again, mod_cluster was probably restarted and lost this node
+  # try to register again, mod_cluster was probably restarted and lost this node
 		$self->mcmp_config($mcmp);
 		$self->mcmp_enable_app($mcmp);
 	}

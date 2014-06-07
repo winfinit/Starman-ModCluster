@@ -115,11 +115,87 @@ Allow Starman to listen for mod_clusters multicast traffic for dynamic subscript
 
 =item --mc-multicast-address (optional)
 
+	--mc-multicase-address 224.0.1.105
+
 Address to listen multicast traffic on. Defaults to 224.0.1.105
 
 =item --mc-multicast-port (optional)
 
+	--mc-multicase-port 23364
+
 Port that mod_cluster is broadcasting its information. Defaults to 23364
+
+=item --mc-sticky-session (optional)
+
+	--mc-sticky-session no
+
+Stick a request to a node "yes"/"no" (Defaults to "yes")
+
+=item --mc-sticky-session-cookie (optional)
+
+	--mc-sticky-session-cookie CookieName
+
+Name of the cookie containing the session id (Defaults to "JSESSIONID")
+
+=item --mc-sticky-session-remove (optional)
+
+	--mc-sticky-session-remove yes
+
+remove the session id (cookie or parameter) when the request can't be routed to the right node "yes"/"no" (Defaults to "no")
+
+=item --mc-sticky-session-force (optional)
+
+	--mc-sticky-session-force no
+
+Return an error if the request can't be routed according to JVMRoute (Defaults to "yes")
+
+=item --mc-wait-worker (optional)
+
+	--mc-wait-worker 10
+
+time in seconds to wait for an available worker. (Defaults to 0, no wait)
+
+=item --mc-max-attempts (optional)
+
+	--mc-max-attempts 5
+
+number of attemps to send the request to the backend server (Defaults to 1)
+
+=item --mc-flush-packets (optional)
+
+	--mc-flush-packets on
+
+Tell how to flush the packets. On: Send immediately, Auto wait for flushwait time before sending, Off don't flush. (Defaults to "off")
+
+=item --mc-flush-wait (optional)
+
+	--mc-flush-packets 5
+
+Time to wait before flushing. Value in seconds (Defaults to 10)
+
+=item --mc-ping (optional)
+
+	--mc-ping 5
+
+Time to wait for a pong answer to a ping. 0 means we don't try to ping before sending. Value in secondes (Defaults to 10)
+
+=item --mc-smax (optional)
+
+	--mc-smax 5
+
+soft max inactive connection over that limit after ttl are closed. Default depends on the mpm configuration
+
+=item --mc-ttl (optional)
+
+	--mc-ttl 120
+
+max time in seconds to life for connection above smax. (Defaults to 60)
+
+=item --mc-timeout (optional)
+
+	--mc-timeout 60
+
+Max time httpd will wait for the backend connection. (Defaults to 0, no timeout)
 
 =item --mc-debug (optional)
 
