@@ -12,3 +12,5 @@ Revision history for Perl extension Starman::ModCluster.
 	- removed debug messages that were left by mistake
 0.07 Tue June 7 11:53:00 2014
 	- added rest of the MCMP CONFIG method keys
+0.08 Tue June 7 12:21:00 2014
+	- fixed bug with status broadcast

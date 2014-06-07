@@ -321,10 +321,8 @@ sub mcmp_status {
 	);
 
 	if ( exists $response->{State} && $response->{State} ne 'OK' ) {
+	    # try to register again, mod_cluster was probably restarted and lost this node
 		$self->log( 1, "STATUS response is not OK: " . $response->{Status} );
-	}
-	else {
-  # try to register again, mod_cluster was probably restarted and lost this node
 		$self->mcmp_config($mcmp);
 		$self->mcmp_enable_app($mcmp);
 	}
