@@ -14,3 +14,5 @@ Revision history for Perl extension Starman::ModCluster.
 	- added rest of the MCMP CONFIG method keys
 0.08 Tue June 7 12:21:00 2014
 	- fixed bug with status broadcast
+0.09 Tue June 11 12:41:00 2014
+	- fixed sticky session force option

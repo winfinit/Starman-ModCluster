@@ -283,6 +283,7 @@ sub mcmp_config {
 			StickySessionCookie => $self->{options}->{mc_sticky_session_cookie},
 			StickySessionPath   => $self->{options}->{mc_sticky_session_path},
 			StickySessionRemove => $self->{options}->{mc_sticky_session_remove},
+			StickySessionForce 	=> $self->{options}->{mc_sticky_session_force},
 			WaitWorker          => $self->{options}->{mc_wait_worker},
 			MaxAttempts         => $self->{options}->{mc_max_attempts},
 			FlushPackets        => $self->{options}->{mc_flush_packets},
